@@ -1,3 +1,6 @@
+#include "essential.hpp"
+#include "graphics.h"
+
 enum GAME_STATE
 {
 	MENU,
@@ -11,22 +14,6 @@ enum PLAY_STATE
 	SERVE_PLAYER_TWO,
 	TOWARD_PLAYER_ONE,
 	TOWARD_PLAYER_TWO
-};
-
-class Vector2D
-{
-public:
-	float x;
-	float y;
-};
-
-class Rectangle
-{
-public:
-	float x;
-	float y;
-	float width;
-	float height;
 };
 
 class Court

@@ -4,7 +4,11 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/opt/devkitpro/**"
+                "/opt/devkitpro/**",
+                "/opt/devkitpro/libctru/include/**",
+                "/opt/devkitpro/devkitARM/arm-none-eabi/include/**",
+                "/opt/devkitpro/devkitARM/include/**",
+                "/opt/devkitpro/portlibs/3ds/**"
             ],
             "defines": [],
             "cStandard": "c17",

@@ -1,3 +1,3 @@
-# template
+# Pong
 
-This is a template for starting new 3DS libctru projects.
+Pong example for 3DS.
