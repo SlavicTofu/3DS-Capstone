@@ -1,5 +1,6 @@
 #include "essential.hpp"
-#include "graphics.h"
+
+#pragma once
 
 enum GAME_STATE
 {
@@ -66,6 +67,7 @@ public:
 	{
 		m_position = position;
 		m_radius = radius;
+		m_velocity = Vector2D(0,0);
 	}
 	Vector2D getPosition()
 	{
