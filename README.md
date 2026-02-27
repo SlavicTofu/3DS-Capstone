@@ -1,5 +1,5 @@
 # 3DS Capstone Project
-So, yeah. This is my senior capstone project. I'm making a game for the Nintendo 3DS.
+This is my senior capstone project. I'm making a game for the Nintendo 3DS.
 This is a pretty difficult endeavor for me for the following reasons:
 1. Making a video game is difficult as-is.
 2. The Nintendo 3DS does not have an official software development kit, so I will have to use homebrew software.
