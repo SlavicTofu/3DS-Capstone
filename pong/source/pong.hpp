@@ -1,4 +1,6 @@
 #include "essential.hpp"
+#include "paddle.h"
+#include "ball.h"
 
 #pragma once
 
@@ -8,9 +10,9 @@
 #define PADDLE_HEIGHT 40
 #define BALL_RADIUS 5
 #define HIT_MULTIPLIER 1.1
-#define CPU_FOLLOW_DISTANCE 20
+#define CPU_FOLLOW_DISTANCE 10
 #define PADDLE_MARGIN 10
-#define CPU_SPEED 80
+#define CPU_SPEED 100
 #define PLAYER_SPEED 100
 
 
@@ -42,6 +44,8 @@ float getDeltaTime()
     return deltaTime;
 }
 
+// Drawing
+
 void drawCircle(Vector2D position, float radius, u32 color)
 {
     float x = position.x;
@@ -54,90 +58,7 @@ void drawPaddle(float x, float y, float height, u32 color)
 	C2D_DrawRectangle(x, y, 0, PADDLE_WIDTH, height, color, color, color, color);
 }
 
-class Paddle
-{
-protected:
-	float y = 0;
-public:
-	Paddle()
-	{
-		y = 0;
-	}
-	Paddle(float inY)
-	{
-		y = inY;
-	}
-	float getY()
-	{
-		return y;
-	}
-	void move(float inY, float dt)
-	{
-		float tempY = y;
-		tempY += inY * dt;
-
-		if(tempY + PADDLE_HEIGHT > SCREEN_HEIGHT)
-			tempY = SCREEN_HEIGHT - PADDLE_HEIGHT;
-		else if (tempY < 0)
-			tempY = 0;
-
-		y = tempY;
-	}
-};
-
-class Ball
-{
-private:
-	Vector2D m_position;
-	float m_radius;
-	Vector2D m_velocity;
-public:
-	Ball()
-	{
-		m_position = Vector2D(0,0);
-		m_radius = 5;
-		m_velocity = Vector2D(0,0);
-	}
-	Ball(Vector2D position, float radius)
-	{
-		m_position = position;
-		m_radius = radius;
-		m_velocity = Vector2D(-50,100);
-	}
-	Vector2D getPosition()
-	{
-		return m_position;
-	}
-	float getRadius()
-	{
-		return m_radius;
-	}
-	Vector2D getVelocity()
-	{
-		return m_velocity;
-	}
-	void reset()
-	{
-		m_position.x = SCREEN_WIDTH/2;
-		m_position.y = SCREEN_HEIGHT/2;
-
-		m_velocity = Vector2D(0,0);
-	}
-	void hitWall()
-	{
-		m_velocity.y *= -1;
-	}
-	void hitPaddle(Paddle paddle)
-	{
-		m_velocity.x *= -1.05;
-
-	}
-	void applyPhysics(float dt)
-	{
-		m_position.y += m_velocity.y * dt;
-		m_position.x += m_velocity.x * dt;
-	}
-};
+// Game
 
 class PongGame
 {
@@ -188,10 +109,14 @@ public:
 		{
 			ball.reset();
 		}
-		else if (ballX - ballR < PADDLE_MARGIN + PADDLE_WIDTH && ballY > player.getY() - ballR && ballY < player.getY() + PADDLE_HEIGHT + ballR) // contact with player
+		else if (ballX - ballR < PADDLE_MARGIN + PADDLE_WIDTH &&
+				 ballY > player.getY() - ballR &&
+				 ballY < player.getY() + PADDLE_HEIGHT + ballR) // contact with player
 			ball.hitPaddle(player);
 
-		else if (ballX + ballR > SCREEN_WIDTH - PADDLE_MARGIN && ballY > cpu.getY() - ballR && ballY < cpu.getY() + PADDLE_HEIGHT + ballR) // contact with cpu
+		else if (ballX + ballR > SCREEN_WIDTH - PADDLE_MARGIN &&
+				 ballY > cpu.getY() - ballR &&
+				 ballY < cpu.getY() + PADDLE_HEIGHT + ballR) // contact with cpu
 			ball.hitPaddle(cpu);
 
 		if (ballY - ballR <= 0 || ballY + ballR > SCREEN_HEIGHT) // hit walls
@@ -202,17 +127,12 @@ public:
 		// cpu logic
 		float cpuY = cpu.getY();
 		float ballVX = ball.getVelocity().x;
-		float distance = std::abs(ballY - (cpuY + PADDLE_HEIGHT / 2));
-		if (ballX > SCREEN_WIDTH/2 && ballVX > 0 && distance > CPU_FOLLOW_DISTANCE)
+		float ballVY = ball.getVelocity().y;
+		float distance = ballY + ballVY * 0.3 - (cpuY + PADDLE_HEIGHT / 2);
+
+		if (ballX > SCREEN_WIDTH/2 && ballVX > 0 && (distance > CPU_FOLLOW_DISTANCE || distance < -CPU_FOLLOW_DISTANCE))
 		{
-			if (ballY > cpuY + PADDLE_HEIGHT / 2)
-			{
-				cpu.move(CPU_SPEED, dt);
-			}
-			else
-			{
-				cpu.move(-CPU_SPEED, dt);
-			}
+			cpu.move(CPU_SPEED * distance * 0.02, dt);
 		}
 	}
 	void render()
