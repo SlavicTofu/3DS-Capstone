@@ -69,7 +69,7 @@ private:
     C3D_RenderTarget* top;
     u32 clrClear, clrBlue, clrWhite, clrRed;
 public:
-	PongGame(const Ball& inBall, const Paddle& inPlayer, const Paddle& inCPU, C3D_RenderTarget* inTop, u32 clear, u32 blue, u32 white, u32 red) // passing by reference is a good idea? i will want guidance on this
+	PongGame(Ball inBall, Paddle inPlayer, Paddle inCPU, C3D_RenderTarget* inTop, u32 clear, u32 blue, u32 white, u32 red)
 	{
 		ball = inBall;
 		player = inPlayer;
