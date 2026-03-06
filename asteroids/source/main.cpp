@@ -11,31 +11,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAX_SPRITES   768
+#include "game.hpp"
+#include "essential.hpp"
+#include "deltaTime.hpp"
+
 #define SCREEN_WIDTH  400
 #define SCREEN_HEIGHT 240
-
-// Simple sprite struct
-typedef struct
-{
-	C2D_Sprite spr;
-	float x, y, rotation;
-} Sprite;
-
-class Rectangle
-{
-private:
-	float x;
-	float y;
-	float width;
-	float height;
-public:
-	Rectangle()
-};
-
-static C2D_SpriteSheet spriteSheet;
-static Sprite sprites[MAX_SPRITES];
-static size_t numSprites = MAX_SPRITES/2;
 
 //---------------------------------------------------------------------------------
 static void initSprites() {
@@ -55,24 +36,9 @@ static void initSprites() {
 	}
 }
 
-//---------------------------------------------------------------------------------
-static void moveSprites() {
-//---------------------------------------------------------------------------------
-	for (size_t i = 0; i < numSprites; i++)
-	{
-		Sprite* sprite = &sprites[i];
-		C2D_SpriteMove(&sprite->spr, sprite->dx, sprite->dy);
-		C2D_SpriteRotateDegrees(&sprite->spr, 1.0f);
-
-		// Check for collision with the screen boundaries
-		if ((sprite->spr.params.pos.x < sprite->spr.params.pos.w / 2.0f && sprite->dx < 0.0f) ||
-			(sprite->spr.params.pos.x > (SCREEN_WIDTH-(sprite->spr.params.pos.w / 2.0f)) && sprite->dx > 0.0f))
-			sprite->dx = -sprite->dx;
-
-		if ((sprite->spr.params.pos.y < sprite->spr.params.pos.h / 2.0f && sprite->dy < 0.0f) ||
-			(sprite->spr.params.pos.y > (SCREEN_HEIGHT-(sprite->spr.params.pos.h / 2.0f)) && sprite->dy > 0.0f))
-			sprite->dy = -sprite->dy;
-	}
+void drawRectangle(Rectangle rect, u32 color)
+{
+	C2D_DrawRectangle(rect.x, rect.y, 0, rect.width, rect.height, color, color, color, color);
 }
 
 //---------------------------------------------------------------------------------
@@ -93,42 +59,20 @@ int main(int argc, char* argv[]) {
 	spriteSheet = C2D_SpriteSheetLoad("romfs:/gfx/sprites.t3x");
 	if (!spriteSheet) svcBreak(USERBREAK_PANIC);
 
-	// Initialize sprites
-	initSprites();
-
-	printf("\x1b[8;1HPress Up to increment sprites");
-	printf("\x1b[9;1HPress Down to decrement sprites");
+	// Init Game
+	AsteroidsGame game = AsteroidsGame(top);
+	
+	// Init deltaTime
+	initTime();
 
 	// Main loop
 	while (aptMainLoop())
 	{
-		hidScanInput();
+		float dt = getDeltaTime();
 
-		// Respond to user input
-		u32 kDown = hidKeysDown();
-		if (kDown & KEY_START)
-			break; // break in order to return to hbmenu
-
-		u32 kHeld = hidKeysHeld();
-		if ((kHeld & KEY_UP) && numSprites < MAX_SPRITES)
-			numSprites++;
-		if ((kHeld & KEY_DOWN) && numSprites > 1)
-			numSprites--;
-
-		moveSprites();
-
-		printf("\x1b[1;1HSprites: %zu/%u\x1b[K", numSprites, MAX_SPRITES);
-		printf("\x1b[2;1HCPU:     %6.2f%%\x1b[K", C3D_GetProcessingTime()*6.0f);
-		printf("\x1b[3;1HGPU:     %6.2f%%\x1b[K", C3D_GetDrawingTime()*6.0f);
-		printf("\x1b[4;1HCmdBuf:  %6.2f%%\x1b[K", C3D_GetCmdBufUsage()*100.0f);
-
-		// Render the scene
-		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-		C2D_TargetClear(top, C2D_Color32f(0.0f, 0.0f, 0.0f, 1.0f));
-		C2D_SceneBegin(top);
-		for (size_t i = 0; i < numSprites; i ++)
-			C2D_DrawSprite(&sprites[i].spr);
-		C3D_FrameEnd(0);
+		game.handleInput(dt);
+		game.update(dt);
+		game.render();
 	}
 
 	// Delete graphics

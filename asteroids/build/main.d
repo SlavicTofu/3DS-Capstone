@@ -1,4 +1,5 @@
-main.o: /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/main.c \
+main.o: \
+ /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/main.cpp \
  /opt/devkitpro/libctru/include/citro2d.h \
  /opt/devkitpro/libctru/include/citro3d.h \
  /opt/devkitpro/libctru/include/c3d/types.h \
@@ -109,7 +110,14 @@ main.o: /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/main.c \
  /opt/devkitpro/libctru/include/c2d/spritesheet.h \
  /opt/devkitpro/libctru/include/c2d/sprite.h \
  /opt/devkitpro/libctru/include/c2d/text.h \
- /opt/devkitpro/libctru/include/c2d/font.h
+ /opt/devkitpro/libctru/include/c2d/font.h \
+ /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/game.hpp \
+ /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/actor.hpp \
+ /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/essential.hpp \
+ /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/spriteHandler.hpp \
+ /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/player.hpp \
+ /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/asteroid.hpp \
+ /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/deltaTime.hpp
 /opt/devkitpro/libctru/include/citro2d.h:
 /opt/devkitpro/libctru/include/citro3d.h:
 /opt/devkitpro/libctru/include/c3d/types.h:
@@ -221,3 +229,10 @@ main.o: /home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/main.c \
 /opt/devkitpro/libctru/include/c2d/sprite.h:
 /opt/devkitpro/libctru/include/c2d/text.h:
 /opt/devkitpro/libctru/include/c2d/font.h:
+/home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/game.hpp:
+/home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/actor.hpp:
+/home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/essential.hpp:
+/home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/spriteHandler.hpp:
+/home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/player.hpp:
+/home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/asteroid.hpp:
+/home/tofu/Documents/GitHub/3DS-Capstone/asteroids/source/deltaTime.hpp:
