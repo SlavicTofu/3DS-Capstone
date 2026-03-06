@@ -37,6 +37,7 @@ public:
 	}
 
 	bool exitGame = false;
+	Player* player = new Player(300, 150, 1);
 
 	void handleInput(float dt)
 	{
@@ -48,12 +49,18 @@ public:
 		if (kDown & KEY_START)
 			exitGame = true; // to return to hbmenu
 
+		if(kHeld & KEY_CPAD_LEFT)
+            player->rotation -= 120 * dt;
+        if(kHeld & KEY_CPAD_RIGHT)
+            player->rotation += 120 * dt;
+		if(kHeld & KEY_CPAD_UP)
+			player->accelerateForward();
 		
 	}
 	void initialize()
 	{
 		actors.push_back(new Actor(100, 100, 0));
-		actors.push_back(new Player(300, 150, 2));
+		actors.push_back(player);
 		actors.push_back(new Asteroid(200, 100, 5));
 
 	}
@@ -61,8 +68,6 @@ public:
 	{
 		for( Actor* actor : actors )
 		{
-			C2D_SpriteSetPos(&actor->spr->spr, actor->x, actor->y);
-			
 			actor->act(dt);
 		}
 	}
@@ -75,9 +80,11 @@ public:
 		
 		// Draw the things to render
 		
+		C2D_DrawRectSolid(player->hitbox.x, player->hitbox.y, 0, player->hitbox.width, player->hitbox.height, C2D_Color32(0x8B, 0xFF, 0xA8, 0x88));
+
 		for( Actor* actor : actors )
 		{
-			C2D_DrawSprite(&actor->spr->spr);
+			actor->draw();
 		}
 
 		C3D_FrameEnd(0);
