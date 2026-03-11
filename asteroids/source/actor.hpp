@@ -1,5 +1,6 @@
 #include "essential.hpp"
 #include "spriteHandler.hpp"
+#include <algorithm>
 
 #pragma once
 
@@ -8,14 +9,16 @@
 
 class Actor
 {
+protected:
+    std::vector<Actor*>& actorList;
 public:
     float x, y, rotation, rotationOffset, acceleration, maxSpeed, deceleration;
     Vector2D velocityVec, accelerationVec;
     Sprite* spr;
     Rectangle hitbox;
 
-    Actor()
-    {
+    Actor(std::vector<Actor*>& inActorList) : actorList(inActorList)
+    { // I'm setting values, but this sprite will never actually be drawn because it won't have an actor list.
         // position and rotation
         x = 100;
         y = 100;
@@ -27,19 +30,23 @@ public:
         velocityVec = Vector2D(0,0);
         accelerationVec = Vector2D(0,0);
         acceleration = 0;
-        maxSpeed = 1000;
+        maxSpeed = 100;
         deceleration = 0;
 
         // sprite and hitbox
         spr = initSprite(0);
         hitbox = Rectangle(x, y, spr->spr.image.subtex->width, spr->spr.image.subtex->height);
     }
-    Actor(float inX, float inY, float index)
+    Actor(float inX, float inY, float index, std::vector<Actor*>& inActorList) : actorList(inActorList)
     {
         x = inX;
         y = inY;
+        rotation = 0;
+        rotationOffset = 0;
         spr = initSprite(index);
         hitbox = Rectangle(x, y, spr->spr.image.subtex->width, spr->spr.image.subtex->height);
+
+        actorList.push_back(this);
     }
 
     virtual void act(float dt)
@@ -59,6 +66,11 @@ public:
         hitbox.y *= scalar;
         hitbox.width *= scalar;
         hitbox.height *= scalar;
+    }
+
+    virtual void dispose()
+    {
+        actorList.erase(std::remove(actorList.begin(), actorList.end(), this), actorList.end());
     }
 
     virtual void draw()
@@ -121,7 +133,7 @@ public:
         if(y - hitbox.height > SCREEN_HEIGHT)
             y = -hitbox.height;
         if(y < -hitbox.height)
-            y = SCREEN_HEIGHT;
+            y = SCREEN_HEIGHT + hitbox.height;
         if(x - hitbox.width > SCREEN_WIDTH)
             x = -hitbox.width;
         if(x < -hitbox.width)

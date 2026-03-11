@@ -20,7 +20,9 @@ public:
 
 	Vector2D getVelocity();
 
-	void reset();
+	void setPosition(float x, float y);
+
+	void setVelocity(float x, float y);
 
 	void hitWall();
 

@@ -29,12 +29,15 @@ Vector2D Ball::getVelocity()
 {
 	return m_velocity;
 }
-void Ball::reset()
+void Ball::setPosition(float x, float y)
 {
-	m_position.x = SCREEN_WIDTH/2;
-	m_position.y = SCREEN_HEIGHT/2;
-
-	m_velocity = Vector2D(0,0);
+	m_position.x = x;
+	m_position.y = y;
+}
+void Ball::setVelocity(float x, float y)
+{
+	m_velocity.x = x;
+	m_velocity.y = y;
 }
 void Ball::hitWall()
 {
@@ -44,20 +47,34 @@ void Ball::hitPaddle(Paddle paddle)
 {
 	m_velocity.x *= -1.05;
 
-	float distToCenter = paddle.getY() - m_position.y;
+	float pHeight = paddle.getHeight();
+	float distToCenter = (paddle.getY() + pHeight/2) - m_position.y;
+	float rungSection = pHeight / 16;
 	
-	if( distToCenter < 15 && distToCenter > 5 ) // 1st 'rung' positive
-		m_velocity.y -= 10;
-	else if( distToCenter > -15 && distToCenter < -5 ) // 1st 'rung' negative
-		m_velocity.y += 10;
-	else if( distToCenter < 30 && distToCenter > 15 ) // 2nd 'rung' positive
-		m_velocity.y -= 30;
-	else if( distToCenter > -30 && distToCenter < -15 ) // 2nd 'rung' negative
-		m_velocity.y += 30;
-	else if( distToCenter < 60 && distToCenter > 30 ) // 3rd 'rung' positive
-		m_velocity.y -= 90;
-	else if( distToCenter > -60 && distToCenter < -30 ) // 3rd 'rung' negative
-		m_velocity.y += 90;
+	if( distToCenter < 3 * rungSection && distToCenter > rungSection ) // 1st 'rung' positive
+	{
+		m_velocity.y = -40;
+	}
+	else if( distToCenter > -3 * rungSection && distToCenter < -rungSection ) // 1st 'rung' negative
+	{
+		m_velocity.y = 40;
+	}
+	else if( distToCenter < 6 * rungSection && distToCenter > 3 * rungSection ) // 2nd 'rung' positive
+	{
+		m_velocity.y = -60;
+	}
+	else if( distToCenter > -6 * rungSection && distToCenter < -3 * rungSection ) // 2nd 'rung' negative
+	{
+		m_velocity.y = 60;
+	}
+	else if( distToCenter < 10 * rungSection && distToCenter > 6 * rungSection ) // 3rd 'rung' positive
+	{
+		m_velocity.y = -120;
+	}
+	else if( distToCenter > -10 * rungSection && distToCenter < -6 * rungSection ) // 3rd 'rung' negative
+	{
+		m_velocity.y = 120;
+	}
 }
 void Ball::applyPhysics(float dt)
 {

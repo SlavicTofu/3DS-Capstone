@@ -21,14 +21,13 @@ enum GAME_STATE
 
 u32 clrClear = C2D_Color32(0x00, 0x00, 0x00, 0x00);
 
-std::vector<Actor*> actors{};
-
 // Game
 
 class AsteroidsGame
 {
 private:
     C3D_RenderTarget* top;
+	std::vector<Actor*> actors{};
 public:
 	AsteroidsGame(C3D_RenderTarget* inTop)
 	{
@@ -37,7 +36,7 @@ public:
 	}
 
 	bool exitGame = false;
-	Player* player = new Player(300, 150, 1);
+	Player* player = new Player(300, 150, 1, actors);
 
 	void handleInput(float dt)
 	{
@@ -55,13 +54,17 @@ public:
             player->rotation += 120 * dt;
 		if(kHeld & KEY_CPAD_UP)
 			player->accelerateForward();
+
+		if(kDown & KEY_A)
+		{
+			printf("Actors List has %i", actors.size());
+		}
 		
 	}
 	void initialize()
 	{
-		actors.push_back(new Actor(100, 100, 0));
-		actors.push_back(player);
-		actors.push_back(new Asteroid(200, 100, 5));
+		new Actor(100, 100, 0, actors);
+		new Asteroid(200, 100, 5, actors);
 
 	}
 	void update(float dt)
