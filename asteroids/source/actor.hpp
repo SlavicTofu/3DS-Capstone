@@ -9,15 +9,13 @@
 
 class Actor
 {
-protected:
-    std::vector<Actor*>& actorList;
 public:
     float x, y, rotation, rotationOffset, acceleration, maxSpeed, deceleration;
     Vector2D velocityVec, accelerationVec;
-    Sprite* spr;
+    C2D_Sprite spr;
     Rectangle hitbox;
 
-    Actor(std::vector<Actor*>& inActorList) : actorList(inActorList)
+    Actor()
     { // I'm setting values, but this sprite will never actually be drawn because it won't have an actor list.
         // position and rotation
         x = 100;
@@ -34,19 +32,17 @@ public:
         deceleration = 0;
 
         // sprite and hitbox
-        spr = initSprite(0);
-        hitbox = Rectangle(x, y, spr->spr.image.subtex->width, spr->spr.image.subtex->height);
+        setupSprite(&this->spr, 0);
+        hitbox = Rectangle(x, y, spr.image.subtex->width, spr.image.subtex->height);
     }
-    Actor(float inX, float inY, float index, std::vector<Actor*>& inActorList) : actorList(inActorList)
+    Actor(float inX, float inY, int index)
     {
         x = inX;
         y = inY;
         rotation = 0;
         rotationOffset = 0;
-        spr = initSprite(index);
-        hitbox = Rectangle(x, y, spr->spr.image.subtex->width, spr->spr.image.subtex->height);
-
-        actorList.push_back(this);
+        setupSprite(&this->spr, index);
+        hitbox = Rectangle(x, y, spr.image.subtex->width, spr.image.subtex->height);
     }
 
     virtual void act(float dt)
@@ -68,16 +64,11 @@ public:
         hitbox.height *= scalar;
     }
 
-    virtual void dispose()
-    {
-        actorList.erase(std::remove(actorList.begin(), actorList.end(), this), actorList.end());
-    }
-
     virtual void draw()
     {
-        C2D_SpriteSetPos(&spr->spr, x, y);
-        C2D_SpriteSetRotationDegrees(&spr->spr, rotation + rotationOffset);
-        C2D_DrawSprite(&spr->spr);
+        C2D_SpriteSetPos(&this->spr, x, y);
+        C2D_SpriteSetRotationDegrees(&this->spr, rotation + rotationOffset);
+        C2D_DrawSprite(&this->spr);
     }
 
     // PHYSICS
@@ -138,5 +129,10 @@ public:
             x = -hitbox.width;
         if(x < -hitbox.width)
             x = SCREEN_WIDTH + hitbox.width;
+    }
+
+    bool overlaps(Actor* actor)
+    {
+        return hitbox.overlaps(actor->hitbox);
     }
 };

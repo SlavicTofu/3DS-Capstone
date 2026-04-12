@@ -4,12 +4,19 @@
 
 static float pi = 2*asin(1.0);
 static float degreesToRadians = pi / 180;
+static float radiansToDegrees = 180 / pi;
 
-static float clamp (float value, float min, float max)
+static float clamp(float value, float min, float max)
 {
 	if (value < min) return min;
 	if (value > max) return max;
 	return value;
+}
+
+static float lerp(float a, float b, float t)
+{
+	clamp(t, 0, 1);
+	return a + t * (b - a);
 }
 
 class Vector2D
@@ -76,6 +83,16 @@ public:
 
 		return *this;
 	}
+	float toDegrees()
+    {
+        float radians = atan2(y, x);
+		float degreeValue = radians * radiansToDegrees;
+
+		// I only want positive degree values soooo
+		if(degreeValue < 0) degreeValue = 360 + degreeValue;
+
+		return degreeValue;
+    }
 };
 
 class Rectangle
@@ -103,9 +120,3 @@ public:
 		return x < r.x + r.width && x + width > r.x && y < r.y + r.height && y + height > r.y;
 	}
 };
-
-typedef struct
-{
-	C2D_Sprite spr;
-	float x, y, rotation;
-} Sprite;

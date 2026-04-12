@@ -19,29 +19,6 @@
 #define SCREEN_HEIGHT 240
 
 //---------------------------------------------------------------------------------
-static void initSprites() {
-//---------------------------------------------------------------------------------
-	size_t numImages = C2D_SpriteSheetCount(spriteSheet);
-	srand(time(NULL));
-
-	for (size_t i = 0; i < MAX_SPRITES; i++)
-	{
-		Sprite* sprite = &sprites[i];
-
-		// Random image, position, rotation and speed
-		C2D_SpriteFromSheet(&sprite->spr, spriteSheet, rand() % numImages);
-		C2D_SpriteSetCenter(&sprite->spr, 0.5f, 0.5f);
-		C2D_SpriteSetPos(&sprite->spr, rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
-		C2D_SpriteSetRotation(&sprite->spr, C3D_Angle(rand()/(float)RAND_MAX));
-	}
-}
-
-void drawRectangle(Rectangle rect, u32 color)
-{
-	C2D_DrawRectangle(rect.x, rect.y, 0, rect.width, rect.height, color, color, color, color);
-}
-
-//---------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 //---------------------------------------------------------------------------------
 	// Init libs
@@ -73,6 +50,9 @@ int main(int argc, char* argv[]) {
 		game.handleInput(dt);
 		game.update(dt);
 		game.render();
+
+		if (game.exitGame)
+			break;
 	}
 
 	// Delete graphics
