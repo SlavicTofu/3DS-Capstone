@@ -55,7 +55,7 @@ void drawCircle(Vector2D position, float radius, u32 color)
 
 void drawPaddle(float x, float y, float height, u32 color)
 {
-	C2D_DrawRectangle(x, y, 0, PADDLE_WIDTH, height, color, color, color, color);
+	C2D_DrawRectSolid(x, y, 0, PADDLE_WIDTH, height, color);
 }
 
 // Game

@@ -18,11 +18,13 @@ public:
         rotation = inRotation;
 
         acceleration = 100;
-        maxSpeed = 1 * 0.1 * stage;
+        maxSpeed = 0.05f * stage;
 
         int sprIndex = 0;
 
         stage = inStage;
+
+        type = ASTEROID;
 
         switch(stage)
         {
@@ -33,7 +35,7 @@ public:
             default: sprIndex = (rand() % 4) + 5; break;
         }
         setupSprite(&this->spr, sprIndex);
-        C2D_SpriteSetCenter(&this->spr, 0.5, 0.5);
+        C2D_SpriteSetCenter(&this->spr, 0.5f, 0.5f);
         hitbox = Rectangle(x, y, spr.image.subtex->width, spr.image.subtex->height);
         scaleHitbox(0.7f);
 

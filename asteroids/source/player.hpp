@@ -11,9 +11,9 @@ class Player : public Actor
 private:
     Vector2D inputVec;
     float rotationSmoothness = 3;
-    int health;
 public:
 
+    float iTime;
     bool shooting = false;
 
     Player(float inX, float inY)
@@ -23,6 +23,8 @@ public:
         rotation = 0;
         rotationOffset = 90;
 
+        type = PLAYER;
+
         inputVec = Vector2D(0,0);
 
         velocityVec = Vector2D(0,0);
@@ -31,16 +33,18 @@ public:
         maxSpeed = 300;
         deceleration = 5;
 
-        health = 5;
+        iTime = 0;
 
         setupSprite(&this->spr, TEXTURE_INDEX_FOR_PLAYER);
-        C2D_SpriteSetCenter(&this->spr, 0.5, 0.7);
+        C2D_SpriteSetCenter(&this->spr, 0.5f, 0.7f);
         hitbox = Rectangle(x, y, spr.image.subtex->width, spr.image.subtex->height);
-        scaleHitbox(0.7);
+        scaleHitbox(0.7f);
     }
 
     void act(float dt) override
     {
+        if(iTime > 0) iTime -= dt;
+
         alignHitbox();
         applyPhysics(dt);
         wrapAroundWorld();

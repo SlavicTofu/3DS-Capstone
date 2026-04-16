@@ -10,7 +10,7 @@
 
 #define SCREEN_HEIGHT 240
 #define SCREEN_WIDTH 400
-#define MAX_ACTORS 10
+#define SPAWN_DISTANCE 100
 
 enum GAME_STATE
 {
@@ -28,16 +28,6 @@ class AsteroidsGame
 private:
     C3D_RenderTarget* top;
 	std::vector<Actor*> actors{};
-	std::vector<Asteroid*> asteroids{};
-	std::vector<Laser*> lasers{};
-public:
-	AsteroidsGame(C3D_RenderTarget* inTop)
-	{
-		top = inTop;
-		initialize();
-	}
-
-	bool exitGame = false;
 
 	// declare backdrop and player
 
@@ -46,14 +36,32 @@ public:
 
 	// declare ui elements
 
-	
-	
+	int ui_x = 188;
+	int ui_y = 195;
 
-	void initialize()
+	Actor* ui_elements[6] =
 	{
-		addAsteroid(new Asteroid(200, 100, 1, rand() % 361));
+		new Actor(ui_x, ui_y, 16),
+		new Actor(ui_x + 16, ui_y, 16),
+		new Actor(ui_x + 32, ui_y, 16),
+		new Actor(ui_x, ui_y, 15),
+		new Actor(ui_x + 16, ui_y, 15),
+		new Actor(ui_x + 32, ui_y, 15)
+	};
 
+	// declare game variables
+
+	int player_health = 3;
+	bool game_over = false;
+
+public:
+	AsteroidsGame(C3D_RenderTarget* inTop)
+	{
+		top = inTop;
+		initialize();
 	}
+
+	bool exitGame = false;
 
 	// Adding and disposing actors, maintaining actor lists
 
@@ -68,31 +76,50 @@ public:
 		delete actor;
     }
 
-	void addAsteroid(Asteroid* asteroid)
+	// asteroid spawner
+	void spawnAsteroid()
 	{
-		addActor(asteroid);
-		asteroids.push_back(asteroid);
+		bool spawnValid = false;
+		float spawnX, spawnY;
+		do
+		{
+			spawnX = rand() % SCREEN_WIDTH;
+			spawnY = rand() % SCREEN_HEIGHT;
+
+			Rectangle spawnValidityHitbox = 
+			Rectangle(spawnX - SPAWN_DISTANCE/2,
+					  spawnY - SPAWN_DISTANCE/2,
+					  SPAWN_DISTANCE,
+					  SPAWN_DISTANCE);
+			
+			spawnValid = !player->overlaps(spawnValidityHitbox);
+
+		} while (!spawnValid);
+
+		addActor(new Asteroid(spawnX, spawnY, 1, rand() % 361));
 	}
 
-	void disposeAsteroid(Asteroid* asteroid)
+	// handle Game Over
+	void gameOver()
 	{
-		asteroids.erase(std::remove(asteroids.begin(), asteroids.end(), asteroid), asteroids.end());
-		dispose(asteroid);
-	}
+		for(Actor* actor : actors)
+		{
+			dispose(actor);
+		}
+		delete player;
 
-	void addLaser(Laser* laser)
-	{
-		addActor(laser);
-		lasers.push_back(laser);
-	}
-
-	void disposeLaser(Laser* laser)
-	{
-		lasers.erase(std::remove(lasers.begin(), lasers.end(), laser), lasers.end());
-		dispose(laser);
+		addActor(new Actor((SCREEN_WIDTH/2) - 47, (SCREEN_HEIGHT/2) - 23, 17));
 	}
 
 	// game lifecycle
+
+	void initialize()
+	{
+		for( int i = 1; i <= 4; i++ )
+		{
+			spawnAsteroid();
+		}
+	}
 
 	void handleInput(float dt)
 	{
@@ -109,67 +136,91 @@ public:
 		if (kDown & KEY_START)
 			exitGame = true; // to return to hbmenu
 
-		player->handleInput(dt, kDown, kHeld, pos);
-
-		if(kDown & KEY_A)
-		{
-			printf("Actors List has %i", actors.size());
-		}
+		if(!game_over) player->handleInput(dt, kDown, kHeld, pos);
 		
 	}
+
 	void update(float dt)
 	{
-		// player acts
-
-		player->act(dt);
-
-		if (player->shooting)
+		if (!game_over)
 		{
-			player->shooting = false;
-			addLaser(new Laser(player->x, player->y, player->rotation));
-		}
+			// player acts
 
-		// collisions and stuff
+			player->act(dt);
 
-		for(Laser* laser : lasers)
-		{
-			if(!laser->overlaps(backdrop))
+			if (player->shooting)
 			{
-				disposeLaser(laser);
+				player->shooting = false;
+				addActor(new Laser(player->x, player->y, player->rotation));
 			}
-			else
+
+			// collisions
+			checkCollisions();
+
+			// actors act
+			for( Actor* actor : actors )
 			{
-				for(Asteroid* asteroid : asteroids)
-				{
-					if(laser->overlaps(asteroid))
-					{
-						disposeLaser(laser);
-						if(asteroid->stage <= 3)
-						{
-							int randInt = rand() % 361;
-							addAsteroid(new Asteroid(asteroid->x, asteroid->y, asteroid->stage+1, randInt));
-							addAsteroid(new Asteroid(asteroid->x, asteroid->y, asteroid->stage+1, randInt + randInt));
-						}
-						disposeAsteroid(asteroid);
-					}
-				}
+				actor->act(dt);
 			}
-		}
-
-		for(Asteroid* asteroid : asteroids)
-		{
-			if(player->overlaps(asteroid))
+			if(player_health <= 0)
 			{
-
+				game_over = true;
+				gameOver();
 			}
-		}
-
-		// actors act
-		for( Actor* actor : actors )
-		{
-			actor->act(dt);
 		}
 	}
+
+	void checkCollisions()
+	{
+		for( Actor* actor1 : actors )
+		{
+			if(actor1->type == ASTEROID && actor1->overlaps(player))
+				handleCollisions(actor1, player);
+
+			for ( Actor* actor2 : actors )
+			{
+				if(actor1->overlaps(actor2))
+					handleCollisions(actor1, actor2);
+			}
+		}
+	}
+
+	void handleCollisions(Actor* actor1, Actor* actor2)
+	{
+		if(actor1->type == LASER && !actor1->overlaps(backdrop))
+		{
+			if( ((Laser*)actor1)->lifeTime <= 0 )
+			{
+				dispose(actor1);
+			}
+		}
+		else if(actor1->type == LASER && actor2->type == ASTEROID)
+		{
+			dispose(actor1);
+			if( ((Asteroid*)actor2)->stage <= 3)
+			{
+				int randInt = rand() % 361;
+				addActor(new Asteroid(actor2->x, actor2->y, ((Asteroid*)actor2)->stage+1, randInt));
+				addActor(new Asteroid(actor2->x, actor2->y, ((Asteroid*)actor2)->stage+1, randInt + randInt));
+			}
+			dispose(actor2);
+		}
+
+		if(actor1->type == ASTEROID && actor2->type == PLAYER && player->iTime <= 0)
+		{
+			if( ((Asteroid*)actor1)->stage <= 3)
+			{
+				int randInt = rand() % 361;
+				addActor(new Asteroid(actor1->x, actor1->y, ((Asteroid*)actor1)->stage+1, randInt));
+				addActor(new Asteroid(actor1->x, actor1->y, ((Asteroid*)actor1)->stage+1, randInt + randInt));
+			}
+
+			dispose(actor1);
+			if(player_health >= 1) player_health -= 1;
+			player->iTime = 2;
+		}
+	}
+
 	void render()
 	{
 		// Render the scene
@@ -184,16 +235,18 @@ public:
 		for( Actor* actor : actors )
 		{
 			actor->draw();
-			C2D_DrawRectSolid(actor->hitbox.x, actor->hitbox.y, 0, actor->hitbox.width, actor->hitbox.height, C2D_Color32(0xff, 0x00, 0x00, 0x88));
 		}
 
-		player->draw();
+		if(!game_over) player->draw();
 
 		// draw ui
 
-
-
-		C2D_DrawRectSolid(player->hitbox.x, player->hitbox.y, 0, player->hitbox.width, player->hitbox.height, C2D_Color32(0x8B, 0xFF, 0xA8, 0x88));
+		for( int i = 0; i <= 2; i++ )
+		{
+			ui_elements[i]->draw();
+			if(i < player_health)
+				ui_elements[i+3]->draw();
+		}
 
 		C3D_FrameEnd(0);
 	}

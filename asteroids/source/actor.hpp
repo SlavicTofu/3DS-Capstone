@@ -7,6 +7,14 @@
 #define SCREEN_HEIGHT 240
 #define SCREEN_WIDTH 400
 
+enum ACTOR_TYPE
+{
+    BASE,
+    PLAYER,
+    ASTEROID,
+    LASER
+};
+
 class Actor
 {
 public:
@@ -14,6 +22,7 @@ public:
     Vector2D velocityVec, accelerationVec;
     C2D_Sprite spr;
     Rectangle hitbox;
+    ACTOR_TYPE type;
 
     Actor()
     { // I'm setting values, but this sprite will never actually be drawn because it won't have an actor list.
@@ -22,6 +31,8 @@ public:
         y = 100;
         rotation = 0;
         rotationOffset = 0;
+
+        type = BASE;
 
         // physics data
 
@@ -41,8 +52,14 @@ public:
         y = inY;
         rotation = 0;
         rotationOffset = 0;
+        type = BASE;
         setupSprite(&this->spr, index);
         hitbox = Rectangle(x, y, spr.image.subtex->width, spr.image.subtex->height);
+    }
+
+    virtual ~Actor()
+    {
+        // nothing to add, but compiler was complaining
     }
 
     virtual void act(float dt)
@@ -134,5 +151,10 @@ public:
     bool overlaps(Actor* actor)
     {
         return hitbox.overlaps(actor->hitbox);
+    }
+
+    bool overlaps(Rectangle rect)
+    {
+        return hitbox.overlaps(rect);
     }
 };
